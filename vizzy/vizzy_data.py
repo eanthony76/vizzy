@@ -38,22 +38,22 @@ class vizzy_data:
         self.data = data
         self.column = column
         
-    def char_count(self):
+    def show_char_count(self):
         '''Histogram of the length of your data column in characters'''
         char_plot = self.data[self.column].str.len().hist()
         return char_plot
     
-    def word_count(self):
+    def show_word_count(self):
         '''Histogram of the length of data column in words'''
         count_plot = self.data[self.column].str.split().map(lambda x: len(x)).hist()
         return count_plot
     
-    def word_length(self):
+    def show_word_length(self):
         '''Hist of length of words in data column in characters'''
         len_plot = self.data[self.column].str.split().apply(lambda x : [len(i) for i in x]).map(lambda x: np.mean(x)).hist()
         return len_plot
     
-    def common_stopwords(self):
+    def show_common_stopwords(self):
         '''List of common stopwords in data'''
         stop=set(STOPWORDS)
         corpus=[]
@@ -71,7 +71,7 @@ class vizzy_data:
         plot = plt.bar(x,y)
         return plot
     
-    def common_words(self):
+    def show_common_words(self):
         '''Common words in data'''
         corpus=[]
         new=self.data[self.column].str.split()
@@ -90,7 +90,7 @@ class vizzy_data:
                 y.append(count)
         sns.barplot(x=y,y=x)
         
-    def sentiment(self):
+    def show_sentiment(self):
         '''Sentiment in data'''
         text = self.data[self.column]
         def polarity(text):
@@ -99,7 +99,7 @@ class vizzy_data:
         hist = self.data['polarity_score'].hist()
         return hist
 
-    def sent_cat(self):
+    def show_sentiment_cats(self):
         '''Plot data by sentiment (pos, neu, neg)'''
         def polarity(text):
             return TextBlob(text).sentiment.polarity
@@ -115,7 +115,7 @@ class vizzy_data:
         plot = plt.bar(self.data.polarity.value_counts().index, self.data.polarity.value_counts())
         return plot
     
-    def show_neg(self):
+    def show_neg_sentiment(self):
         '''Show negative sentiment'''
         def polarity(text):
             return TextBlob(text).sentiment.polarity
@@ -131,7 +131,7 @@ class vizzy_data:
         results = self.data[self.data['polarity']=='neg'][self.column].head(5)
         return results
     
-    def show_pos(self):
+    def show_pos_sentiment(self):
         '''Show positive sentiment'''
         def polarity(text):
             return TextBlob(text).sentiment.polarity
@@ -147,12 +147,12 @@ class vizzy_data:
         results = self.data[self.data['polarity']=='pos'][self.column].head(5)
         return results
     
-    def flesch_kincaid(self):
+    def show_flesch_kincaid(self):
         '''show flesch kincaid score'''
         hist = self.data[self.column].apply(lambda x : flesch_reading_ease(x)).hist()
         return hist
     
-    def bi_grams(self):
+    def show_bi_grams(self):
         '''show most common bi-grams'''
         corpus=[]
         new=self.data[self.column].str.split()
@@ -172,7 +172,7 @@ class vizzy_data:
         plot = sns.barplot(x=y,y=x)
         return plot
         
-    def tri_grams(self):
+    def show_tri_grams(self):
         '''show most common tri-grams'''
         corpus=[]
         new=self.data[self.column].str.split()

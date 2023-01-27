@@ -33,10 +33,15 @@ plt.style.use('seaborn-whitegrid')
 # In[ ]:
 
 
-class vizzy_data:
+class vizzy:
     def __init__(self, data, column):
+        from nltk.corpus import stopwords
+        stopwords = set(stopwords.words('english'))
+        data[column] = data[column].apply(lambda x: x.lower())
+        data['text_without_stopwords'] = data[column].apply(lambda x: ' '.join([word for word in x.split() if word.lower() not in stopwords]))
         self.data = data
         self.column = column
+        
         
     def show_char_count(self):
         '''Histogram of the length of your data column in characters'''

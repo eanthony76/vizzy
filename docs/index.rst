@@ -2,7 +2,8 @@
 Documentation
 ================
 
-The main module in this package takes in two inputs: data as a Pandas DataFrame, and a column name as a str.
+
+The vizzy_sentence module in this package take in two inputs: data as a Pandas DataFrame, and a column name as a str.
 
 Example::
 ``Data = pd.read_csv(~/data/data.csv)``

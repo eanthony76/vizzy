@@ -1,6 +1,6 @@
-This package serves to provide visualizations from your NLP data. The Dataset class takes two arguments- a pandas dataframe and a column you wish to visualize.
+This package serves to provide visualizations from your NLP data.
 
-
-The EDA techniques found in this notebook can be found at the following places:
-
+This package was inspired by the work of NeptuneAI and this blog post:
 https://neptune.ai/blog/exploratory-data-analysis-natural-language-processing-tools
+
+This repository contains the Vizzy package and some sample notebooks to help you get started using Vizzy.

@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -48,15 +42,46 @@ class vizzy_sentence:
         char_plot = self.data[self.column].str.len().hist()
         return char_plot
     
+    def print_char_count(self):
+        '''Print average character count per text cell'''
+        def average(numbers):
+            avg = sum(numbers)/len(numbers)
+            return avg
+        counts = [len(word) for word in self.data[self.column]]
+        print("The average number of characters in your text is {}".format(average(counts)))
+        print("The max number of characters in your text is {}".format(max(counts)))
+        print("The smallest number of characters in your text is {}".format(min(counts)))
+    
     def show_word_count(self):
         '''Histogram of the length of data column in words'''
         count_plot = self.data[self.column].str.split().map(lambda x: len(x)).hist()
         return count_plot
     
+    def print_word_count(self):
+        '''Print length of data column in words'''
+        def average(numbers):
+            avg = sum(numbers)/len(numbers)
+            return avg
+        print("The average number of words in your text cells is {}".format(average(self.data[self.column].str.split().map(lambda x: len(x)))))
+        print("The max number of words in your text cells is {}".format(max((self.data[self.column].str.split().map(lambda x: len(x))))))
+        print("The smallest number of words in your text cells is {}".format(min((self.data[self.column].str.split().map(lambda x: len(x))))))
+        
     def show_word_length(self):
         '''Hist of length of words in data column in characters'''
         len_plot = self.data[self.column].str.split().apply(lambda x : [len(i) for i in x]).map(lambda x: np.mean(x)).hist()
         return len_plot
+    
+    def print_word_length(self):
+        '''Print length of words in data in characters'''
+        def average(numbers):
+            avg = sum(numbers)/len(numbers)
+            return avg
+        avg_len = self.data[self.column].str.split().apply(lambda x : [len(i) for i in x]).map(lambda x: np.mean(x))
+        max_len = self.data[self.column].str.split().apply(lambda x: [len(i) for i in x]).map(lambda x: np.max(x))
+        min_len = self.data[self.column].str.split().apply(lambda x: [len(i) for i in x]).map(lambda x: np.min(x))
+        print("The average number of characters of the words in your text cells is {}".format(average(avg_len)))
+        print("The max number of characters of the words in your text cells is {}".format(max(max_len)))
+        print("The smallest number of characters of the words in your text cells is {}".format(min(min_len)))
     
     def show_common_stopwords(self):
         '''List of common stopwords in data'''
@@ -76,6 +101,25 @@ class vizzy_sentence:
         plot = plt.bar(x,y)
         return plot
     
+    def print_common_stopwords(self):
+        '''Print top 10 common stopwords'''
+        stop=set(STOPWORDS)
+        corpus=[]
+        new= self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+
+        from collections import defaultdict
+        dic=defaultdict(int)
+        for word in corpus:
+            if word in STOPWORDS:
+                dic[word]+=1
+        top=sorted(dic.items(), key=lambda x:x[1],reverse=True)[:10] 
+        x,y=zip(*top)
+        print("The most common stopwords in your text cells are:")
+        for word, count in zip(x,y):
+            print(str(word) + " : " + str(count))
+    
     def show_common_words(self):
         '''Common words in data'''
         corpus=[]
@@ -94,6 +138,26 @@ class vizzy_sentence:
                 x.append(word)
                 y.append(count)
         sns.barplot(x=y,y=x)
+        
+    def print_common_words(self):
+        '''Prints top 20 most common words in corpus'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        counter=Counter(corpus)
+        most=counter.most_common()
+        x, y=[], []
+        for word,count in most[:40]:
+            try:
+                if (word not in STOPWORDS):
+                    x.append(word)
+                    y.append(count)
+            except:
+                x.append(word)
+                y.append(count)
+        for word, count in zip(x,y):
+            print(str(word) + " : " + str(count))
         
     def show_sentiment(self):
         '''Sentiment in data'''
@@ -120,7 +184,7 @@ class vizzy_sentence:
         plot = plt.bar(self.data.polarity.value_counts().index, self.data.polarity.value_counts())
         return plot
     
-    def show_neg_sentiment(self):
+    def print_neg_sentiment(self):
         '''Show negative sentiment'''
         def polarity(text):
             return TextBlob(text).sentiment.polarity
@@ -136,7 +200,7 @@ class vizzy_sentence:
         results = self.data[self.data['polarity']=='neg'][self.column].head(5)
         return results
     
-    def show_pos_sentiment(self):
+    def print_pos_sentiment(self):
         '''Show positive sentiment'''
         def polarity(text):
             return TextBlob(text).sentiment.polarity
@@ -156,6 +220,16 @@ class vizzy_sentence:
         '''show flesch kincaid score'''
         hist = self.data[self.column].apply(lambda x : flesch_reading_ease(x)).hist()
         return hist
+    
+    def print_flesch_kincaid(self):
+        '''prints flesch kincaid scores'''
+        def average(numbers):
+            avg = sum(numbers)/len(numbers)
+            return avg
+        scores = self.data[self.column].apply(lambda x : flesch_reading_ease(x))
+        print("The average Flesch-Kincaid score for your text is {}".format(average(scores)))
+        print("The max Flesch-Kincaid score for your text is {}".format(max(scores)))
+        print("The min Flesch-Kincaid score for your text is {}".format(min(scores)))
     
     def show_bi_grams(self):
         '''show most common bi-grams'''
@@ -177,6 +251,28 @@ class vizzy_sentence:
         plot = sns.barplot(x=y,y=x)
         return plot
         
+    def print_bi_grams(self):
+        '''prints most common bi-grams'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.column],2)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        print("The most common bi-grams in your text are:")
+        for word, count in zip(x,y):
+            print(str(word) + " : " + str(count))
+        
+        
     def show_tri_grams(self):
         '''show most common tri-grams'''
         corpus=[]
@@ -196,15 +292,38 @@ class vizzy_sentence:
         x,y=map(list,zip(*top_n_bigrams))
         plot = sns.barplot(x=y,y=x)
         return plot
+
+    def print_tri_grams(self):
+        '''prints most common tri-grams'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.column],3)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        print("The most common tri-grams in your text are:")
+        for word, count in zip(x,y):
+            print(str(word) + " : " + str(count))
+ 
         
 class vizzy_token:
-    def __init__(self, data, column):
-        self.data = data
-        self.column = column
+    def __init__(self, dataframe, text, labels=None):
+        self.data = dataframe
+        self.text = text
+        self.labels = labels
         
     def show_labels_count(self):
         '''show count of each label'''
-        labels = self.data[self.column]
+        labels = self.data[self.labels]
         counter = Counter(labels)
         x = list(counter.keys())
         y = list(counter.values())
@@ -213,7 +332,7 @@ class vizzy_token:
     
     def print_labels_count(self):
         '''print count of each label'''
-        labels = self.data[self.column]
+        labels = self.data[self.labels]
         counter = Counter(labels)
         x = list(counter.keys())
         y = list(counter.values())
@@ -237,7 +356,6 @@ class vizzy_doc:
             
         docs = max(idx for idx, other in self.data.iterrows())
         print("Here is your data summary:")
-        print("\n")
         print("Total number of documents: {}".format(docs))
         print("Total number of {}: {}".format(str(self.column1), (counter(self.data, self.column1))))
         if self.column2 != None:

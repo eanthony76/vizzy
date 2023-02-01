@@ -14,7 +14,7 @@ with open('HISTORY.md') as history_file:
 
 setup_args = dict(
     name='vizzy',
-    version='0.1.1',
+    version='0.1.11',
     description='Useful tools to visualize NLP data',
     long_description_content_type="text/markdown",
     long_description=README + '\n\n' + HISTORY,

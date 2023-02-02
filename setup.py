@@ -14,7 +14,7 @@ with open('HISTORY.md') as history_file:
 
 setup_args = dict(
     name='vizzy',
-    version='0.0.3',
+    version='0.0.6',
     description='Useful tools to visualize NLP data',
     long_description_content_type="text/markdown",
     long_description=README + '\n\n' + HISTORY,
@@ -24,7 +24,7 @@ setup_args = dict(
     author='Evan Anthony',
     author_email='anthonyevanm@gmail.com',
     keywords=['EDA', 'visualization', 'NLP'],
-    url='https://github.com/eanthony1224',
+    url='https://github.com/eanthony76',
     download_url='https://pypi.org/project/vizzy/'
 )
 

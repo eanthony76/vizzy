@@ -8,4 +8,5 @@ This repository contains the Vizzy package and some sample notebooks to help you
 
 
 To install this package, you can use pip install
+
 ``pip install vizzy``

@@ -4,13 +4,9 @@
 # In[ ]:
 
 
-from . import vizzy_doc
-from . import vizzy_sentence
-from . import vizzy_token
+from . import vizzy
 
 __all__ = [
-    'vizzy_doc',
-    'vizzy_sentence',
-    'vizzy_token'
+    'vizzy'
 ]
 

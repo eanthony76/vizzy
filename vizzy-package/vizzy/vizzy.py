@@ -341,19 +341,20 @@ class vizzy_token:
             print("Total number of {}: {}".format(label, count))
 
 class vizzy_doc:
-    def __init__(self, data, column1, column2=None, column3=None, column4=None, column5=None):
+    def __init__(self, data, column1, column2=None, column3=None, column4=None, column5=None, date_column=None, date_format=None):
         self.data = data
         self.column1 = column1
         self.column2 = column2
         self.column3 = column3
         self.column4 = column4
         self.column5 = column5
+        self.date_column = date_column
+        self.date_format = date_format
         
     def print_doc_stats(self):
         '''Print the statistics of your document'''
         def counter(data, column):
             return data[column].nunique()
-            
         docs = max(idx for idx, other in self.data.iterrows())
         print("Here is your data summary:")
         print("Total number of documents: {}".format(docs))
@@ -373,6 +374,60 @@ class vizzy_doc:
         if self.column5 != None:
              print("Total number of {}: {}".format(str(self.column5), (counter(self.data, self.column5))))
         else:
+            pass            
+
+    
+    def show_doc_stats(self):
+        if self.date_column != None and self.date_format != None:
+            def extract_year(data, column, date_format=self.date_format, new_column=None):
+                # Extract the year from the date column
+                data[new_column] = pd.to_datetime(data[column], format = date_format).dt.year
+                return data
+            df = extract_year(self.data, self.date_column, date_format=self.date_format, new_column='year')
+            year_counts = df['year'].value_counts()
+            year_percents = year_counts / year_counts.sum() * 100
+            plt.figure(0)
+            plt.pie(year_percents, labels=year_percents.index[0:40], autopct='%1.1f%%')
+            plt.title("Docs by {}".format(str(self.date_column)))
+        else:
             pass
-    
-    
+        
+        if self.column2 != None:
+            col2_counts = self.data[self.column2].value_counts()
+            col2_percents = col2_counts/col2_counts.sum() * 100
+            plt.figure(1)
+            plt.pie(col2_percents, labels = col2_percents.index, autopct = '%1.1f%%')
+            plt.title("Docs by {}".format(str(self.column2)))
+        else:
+            pass
+            
+        if self.column3 != None:
+            col3_counts = self.data[self.column3].value_counts()
+            col3_percents = col3_counts/col3_counts.sum() * 100 
+            plt.figure(2)
+            plt.pie(col3_percents, labels = col3_percents.index, autopct = '%1.1f%%')
+            plt.title("Docs by {}".format(str(self.column3)))
+        else:
+            pass
+        
+        if self.column4 != None:
+            col4_counts = self.data[self.column4].value_counts()
+            col4_percents = col4_counts/col4_counts.sum() * 100 
+            plt.figure(3)
+            plt.pie(col4_percents, labels = col4_percents.index, autopct = '%1.1f%%')
+            plt.title("Docs by {}".format(str(self.column4)))
+        else:
+            pass
+        
+        if self.column5 != None:
+            col5_counts = self.data[self.column5].value_counts()
+            col5_percents = col5_counts/col5_counts.sum() * 100 
+            plt.figure(4)
+            plt.pie(col5_percents, labels = col5_percents.index, autopct = '%1.1f%%')
+            plt.title("Docs by {}".format(str(self.column5)))
+        else:
+            pass
+        
+        plt.show()
+
+       

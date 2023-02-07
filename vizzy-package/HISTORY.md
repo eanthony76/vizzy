@@ -4,6 +4,8 @@ This is the history file of my package.
 
 1/20/23: Updated vizzy package to fix functions
 
-1/24/23: Created documentation file and updated function names
+2/1/23: Added new functions and object classes
 
-1/27/23: Updated vizzy method to lower all text before transforming
+2/6/23: Added new functions to Vizzy Doc module
+
+2/7/23: Added new functions to Vizzy Token module

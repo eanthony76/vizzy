@@ -1,3 +1,4 @@
+LICENSE
 README.md
 setup.py
 vizzy/__init__.py

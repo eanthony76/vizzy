@@ -339,6 +339,49 @@ class vizzy_token:
         z = zip(x,y)
         for label, count in z:
             print("Total number of {}: {}".format(label, count))
+            
+    def print_case(self):
+        def count_upper_lower_integer(df, column):
+            upper = 0
+            lower = 0
+            integer = 0
+            for token in df[column]:
+                if isinstance(token, int):
+                    integer += 1
+                elif isinstance(token, str):
+                    if token.islower():
+                        lower += 1
+                    elif token.isupper():
+                        upper += 1
+            return {'upper': upper, 'lower': lower, 'integer': integer}
+        result = count_upper_lower_integer(self.data, self.text)
+        print(result)
+    
+    def show_case(self):
+        def count_upper_lower_integer(df, column):
+            upper = 0
+            lower = 0
+            integer = 0
+            for token in df[column]:
+                if isinstance(token, int):
+                    integer += 1
+                elif isinstance(token, str):
+                    if token.islower():
+                        lower += 1
+                    elif token.isupper():
+                        upper += 1
+            return {'upper': upper, 'lower': lower, 'integer': integer}
+        result = count_upper_lower_integer(self.data, self.text)
+        keys = []
+        items = []
+        for key, item in result.items():
+            keys.append(key)
+            items.append(item)
+        plt.pie(items, labels=keys, autopct='%1.1f%%')
+        plt.title('Tokens by case')
+        plt.show
+
+
 
 class vizzy_doc:
     def __init__(self, data, column1, column2=None, column3=None, column4=None, column5=None, date_column=None, date_format=None):

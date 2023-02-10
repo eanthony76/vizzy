@@ -30,12 +30,10 @@ plt.style.use('seaborn-whitegrid')
 class vizzy_sentence:
     def __init__(self, data, column):
         from nltk.corpus import stopwords
-        stopwords = set(stopwords.words('english'))
-        data[column] = data[column].apply(lambda x: x.lower())
-        data['text_without_stopwords'] = data[column].apply(lambda x: ' '.join([word for word in x.split() if word.lower() not in stopwords]))
+        stop = set(stopwords.words('english'))
+        data['text_without_stopwords'] = data[column].apply(lambda x: ' '.join([word for word in x.split() if word.lower() not in stop]))
         self.data = data
         self.column = column
-        
         
     def show_char_count(self):
         '''Histogram of the length of your data column in characters'''
@@ -85,16 +83,15 @@ class vizzy_sentence:
     
     def show_common_stopwords(self):
         '''List of common stopwords in data'''
-        stop=set(STOPWORDS)
+        stop = set(stopwords.words('english'))
         corpus=[]
         new= self.data[self.column].str.split()
         new=new.values.tolist()
         corpus=[word for i in new for word in i]
-
         from collections import defaultdict
         dic=defaultdict(int)
         for word in corpus:
-            if word in STOPWORDS:
+            if word in stop:
                 dic[word]+=1
         top=sorted(dic.items(), key=lambda x:x[1],reverse=True)[:10] 
         x,y=zip(*top)
@@ -103,7 +100,7 @@ class vizzy_sentence:
     
     def print_common_stopwords(self):
         '''Print top 10 common stopwords'''
-        stop=set(STOPWORDS)
+        stop=set(stopwords.words('english'))
         corpus=[]
         new= self.data[self.column].str.split()
         new=new.values.tolist()
@@ -112,7 +109,7 @@ class vizzy_sentence:
         from collections import defaultdict
         dic=defaultdict(int)
         for word in corpus:
-            if word in STOPWORDS:
+            if word in stop:
                 dic[word]+=1
         top=sorted(dic.items(), key=lambda x:x[1],reverse=True)[:10] 
         x,y=zip(*top)
@@ -122,6 +119,7 @@ class vizzy_sentence:
     
     def show_common_words(self):
         '''Common words in data'''
+        stop = set(stopwords.words('english'))
         corpus=[]
         new=self.data[self.column].str.split()
         new=new.values.tolist()
@@ -131,7 +129,7 @@ class vizzy_sentence:
         x, y=[], []
         for word,count in most[:40]:
             try:
-                if (word not in STOPWORDS):
+                if (word not in stop):
                     x.append(word)
                     y.append(count)
             except:
@@ -141,6 +139,8 @@ class vizzy_sentence:
         
     def print_common_words(self):
         '''Prints top 20 most common words in corpus'''
+        stop = set(stopwords.words('english'))
+
         corpus=[]
         new=self.data[self.column].str.split()
         new=new.values.tolist()
@@ -150,7 +150,7 @@ class vizzy_sentence:
         x, y=[], []
         for word,count in most[:40]:
             try:
-                if (word not in STOPWORDS):
+                if (word not in stop):
                     x.append(word)
                     y.append(count)
             except:

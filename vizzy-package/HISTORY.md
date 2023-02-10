@@ -9,3 +9,5 @@ This is the history file of my package.
 2/6/23: Added new functions to Vizzy Doc module
 
 2/7/23: Added new functions to Vizzy Token module
+
+2/10/23: Added documentation and simplified functions

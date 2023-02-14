@@ -382,10 +382,8 @@ f, dataframe, text, labels=None):
         plt.title('Tokens by case')
         plt.show
 
-
-
 class vizzy_doc:
-    def __init__(self, data, column1, column2=None, column3=None, column4=None, column5=None, date_column=None, date_format=None):
+    def __init__(self, data, column1, column2=None, column3=None, column4=None, column5=None, date_column=None, date_format=None, split=None):
         self.data = data
         self.column1 = column1
         self.column2 = column2
@@ -394,6 +392,8 @@ class vizzy_doc:
         self.column5 = column5
         self.date_column = date_column
         self.date_format = date_format
+        self.split = split
+        self.set = [column1, column2, column3, column4, column5]
         
     def print_doc_stats(self):
         '''Print the statistics of your document'''
@@ -431,7 +431,7 @@ class vizzy_doc:
             year_counts = df['year'].value_counts()
             year_percents = year_counts / year_counts.sum() * 100
             plt.figure(0)
-            plt.pie(year_percents, labels=year_percents.index[0:40], autopct='%1.1f%%')
+            plt.bar(year_counts.index, year_counts)
             plt.title("Docs by {}".format(str(self.date_column)))
         else:
             pass
@@ -440,7 +440,7 @@ class vizzy_doc:
             col2_counts = self.data[self.column2].value_counts()
             col2_percents = col2_counts/col2_counts.sum() * 100
             plt.figure(1)
-            plt.pie(col2_percents, labels = col2_percents.index, autopct = '%1.1f%%')
+            plt.bar(col2_counts.index, col2_counts)
             plt.title("Docs by {}".format(str(self.column2)))
         else:
             pass
@@ -449,7 +449,7 @@ class vizzy_doc:
             col3_counts = self.data[self.column3].value_counts()
             col3_percents = col3_counts/col3_counts.sum() * 100 
             plt.figure(2)
-            plt.pie(col3_percents, labels = col3_percents.index, autopct = '%1.1f%%')
+            plt.bar(col3_counts.index, col3_counts)
             plt.title("Docs by {}".format(str(self.column3)))
         else:
             pass
@@ -458,7 +458,7 @@ class vizzy_doc:
             col4_counts = self.data[self.column4].value_counts()
             col4_percents = col4_counts/col4_counts.sum() * 100 
             plt.figure(3)
-            plt.pie(col4_percents, labels = col4_percents.index, autopct = '%1.1f%%')
+            plt.bar(col4_counts.index, col4_counts)
             plt.title("Docs by {}".format(str(self.column4)))
         else:
             pass
@@ -467,11 +467,26 @@ class vizzy_doc:
             col5_counts = self.data[self.column5].value_counts()
             col5_percents = col5_counts/col5_counts.sum() * 100 
             plt.figure(4)
-            plt.pie(col5_percents, labels = col5_percents.index, autopct = '%1.1f%%')
+            plt.bar(col5_counts.index, col5_counts)
             plt.title("Docs by {}".format(str(self.column5)))
         else:
             pass
         
         plt.show()
+        
+    def show_split_doc_stats(self):
+        splits = self.data[self.split].unique()
+        for split in splits:
+            split_df = self.data[self.data[self.split] == split]
+    
+            # Get the list of categorical variables
+            categorical_vars = [col for col in self.set if col != None]
 
-       
+            # Loop through each categorical variable
+            for var in categorical_vars:
+                # Create a histogram for the current categorical variable and split value
+                split_df[var].value_counts().plot(kind="bar")
+                plt.title(f"{var} for {split} Split")
+                plt.xlabel(var)
+                plt.ylabel("Count")
+                plt.show() 

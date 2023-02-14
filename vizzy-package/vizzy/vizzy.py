@@ -28,18 +28,36 @@ plt.style.use('seaborn-whitegrid')
 
 
 class vizzy_sentence:
-    def __init__(self, data, column):
+    def __init__(self, data, column, split=None):
         from nltk.corpus import stopwords
         stop = set(stopwords.words('english'))
         data['text_without_stopwords'] = data[column].apply(lambda x: ' '.join([word for word in x.split() if word.lower() not in stop]))
         self.data = data
         self.column = column
+        self.split = split
         
-    def show_char_count(self):
-        '''Histogram of the length of your data column in characters'''
-        char_plot = self.data[self.column].str.len().hist()
-        return char_plot
-    
+    def show_char_count(self, split1=None, split2=None):
+        '''Histogram of the length of your data column in characters'''    
+        # Plot the histogram for all values
+        plt.hist(self.data[self.column].str.len(), bins=20, color='blue', alpha=0.5, label='All')
+
+        # Plot the histogram for train values
+        plt.hist((self.data[self.column][self.data[self.split]==split1].str.len()), bins=20, color='green', alpha=0.5, label=str(split1))
+        
+        # Plot the histogram for test values
+        plt.hist((self.data[self.column][self.data[self.split]==split2].str.len()), bins=20, color='red', alpha=0.5, label=str(split2))
+
+        # Add the labels and title
+        plt.xlabel('Value')
+        plt.ylabel('Frequency')
+        plt.title('Histograms of Value')
+
+        # Show the legend
+        plt.legend()
+
+        # Show the plot
+        plt.show()
+
     def print_char_count(self):
         '''Print average character count per text cell'''
         def average(numbers):
@@ -50,11 +68,22 @@ class vizzy_sentence:
         print("The max number of characters in your text is {}".format(max(counts)))
         print("The smallest number of characters in your text is {}".format(min(counts)))
     
-    def show_word_count(self):
+    def show_word_count(self, split1=None, split2=None):
         '''Histogram of the length of data column in words'''
-        count_plot = self.data[self.column].str.split().map(lambda x: len(x)).hist()
-        return count_plot
-    
+        plt.hist(self.data[self.column].str.split().map(lambda x: len(x)), bins = 20, color='blue', alpha=0.5, label='All')
+        '''Plot histogram for train values'''
+        plt.hist(self.data[self.data[self.split] == split1][self.column].apply(lambda x: len(x.split())), bins = 20, color='green', alpha=0.5, label=str(split1))        
+        '''Plot histogram for test values'''
+        plt.hist(self.data[self.data[self.split] == split2][self.column].apply(lambda x: len(x.split())), bins = 20, color='red', alpha=0.5, label=str(split2))        
+        '''Add labels and title'''
+        plt.xlabel('Value')
+        plt.ylabel('Frequency')
+        plt.title('Word Count')
+        
+        plt.legend()                                 
+                                        
+        plt.show()                                                                
+                                        
     def print_word_count(self):
         '''Print length of data column in words'''
         def average(numbers):
@@ -64,10 +93,21 @@ class vizzy_sentence:
         print("The max number of words in your text cells is {}".format(max((self.data[self.column].str.split().map(lambda x: len(x))))))
         print("The smallest number of words in your text cells is {}".format(min((self.data[self.column].str.split().map(lambda x: len(x))))))
         
-    def show_word_length(self):
+    def show_word_length(self, split1=None, split2=None):
         '''Hist of length of words in data column in characters'''
-        len_plot = self.data[self.column].str.split().apply(lambda x : [len(i) for i in x]).map(lambda x: np.mean(x)).hist()
-        return len_plot
+        plt.hist(self.data[self.column].str.split().apply(lambda x: [len(i) for i in x]).map(lambda x: np.mean(x)), bins = 20, color='blue', alpha=0.5, label='All')
+        '''Plot histogram for train values'''
+        plt.hist(self.data[self.data[self.split] == split1][self.column].str.split().apply(lambda x: [len(i) for i in x]).map(lambda x: np.mean(x)), bins = 20, color='green', alpha=0.5, label=str(split1))        
+        '''Plot histogram for test values'''
+        plt.hist(self.data[self.data[self.split] == split2][self.column].str.split().apply(lambda x: [len(i) for i in x]).map(lambda x: np.mean(x)), bins = 20, color='red', alpha=0.5, label=str(split2))        
+        '''Add labels and title'''
+        plt.xlabel('Value')
+        plt.ylabel('Frequency')
+        plt.title('Word Length')
+        
+        plt.legend()                                 
+                                        
+        plt.show()
     
     def print_word_length(self):
         '''Print length of words in data in characters'''
@@ -216,11 +256,14 @@ class vizzy_sentence:
         results = self.data[self.data['polarity']=='pos'][self.column].head(5)
         return results
     
-    def show_flesch_kincaid(self):
+    def show_flesch_kincaid(self, split1=None, split2=None):
         '''show flesch kincaid score'''
-        hist = self.data[self.column].apply(lambda x : flesch_reading_ease(x)).hist()
-        return hist
-    
+        plt.hist(self.data[self.column].apply(lambda x : flesch_reading_ease(x)))
+        '''Show histogram for train values'''
+        plt.hist(self.data[self.data[self.split] == split1][self.column].apply(lambda x: flesch_reading_ease(x)), bins = 20, color='red', alpha=0.5, label=str(split1))        
+        '''Show histogram for test values'''
+        plt.hist(self.data[self.data[self.split] == split2][self.column].apply(lambda x: flesch_reading_ease(x)), bins = 20, color='red', alpha=0.5, label=str(split2))        
+        
     def print_flesch_kincaid(self):
         '''prints flesch kincaid scores'''
         def average(numbers):
@@ -250,6 +293,49 @@ class vizzy_sentence:
         x,y=map(list,zip(*top_n_bigrams))
         plot = sns.barplot(x=y,y=x)
         return plot
+    
+    def show_bi_grams_split(self, split1=None, split2=None):
+        '''shows a bar graph of most common bi-grams for train data'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.data[self.split]==split1][self.column],2)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        plt.bar(x,y)
+        plt.title("Bi-Grams in {} data".format(str(split1)))
+        plt.xticks(rotation=90, ha='right')
+        plt.show
+        
+        '''shows a bar graph of most common bi-grams for train data'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.data[self.split]==split2][self.column],2)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        plt.bar(x,y)
+        plt.title("Bi-Grams in {} data".format(str(split1)))
+        plt.xticks(rotation=90, ha='right')
+        plt.show
         
     def print_bi_grams(self):
         '''prints most common bi-grams'''
@@ -269,6 +355,48 @@ class vizzy_sentence:
         top_n_bigrams=get_top_ngram(self.data[self.column],2)[:10]
         x,y=map(list,zip(*top_n_bigrams))
         print("The most common bi-grams in your text are:")
+        for word, count in zip(x,y):
+            print(str(word) + " : " + str(count))
+            
+    def print_bi_grams_split(self, split1=None, split2=None):
+        '''prints most common bi-grams for train data'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.data[self.split]==split1][self.column],2)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        print("The most common bi-grams in your {} text are:".format(str(split1)))
+        for word, count in zip(x,y):
+            print(str(word) + " : " + str(count))
+        
+        '''prints most common bi-grams for test data'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.data[self.split]==split2][self.column],2)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        print('\n')
+        print("The most common bi-grams in your {} text are:".format(str(split2)))
         for word, count in zip(x,y):
             print(str(word) + " : " + str(count))
         
@@ -293,6 +421,49 @@ class vizzy_sentence:
         plot = sns.barplot(x=y,y=x)
         return plot
 
+    def show_tri_grams_split(self, split1=None, split2=None):
+        '''shows a bar graph of most common tri-grams for split1 data'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.data[self.split]==split1][self.column],3)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        plt.bar(x,y)
+        plt.title("Bi-Grams in {} data".format(str(split1)))
+        plt.xticks(rotation=90, ha='right')
+        plt.show
+        
+        '''shows a bar graph of most common tri-grams for split2 data'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.data[self.split]==split2][self.column],3)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        plt.bar(x,y)
+        plt.title("Bi-Grams in {} data".format(str(split1)))
+        plt.xticks(rotation=90, ha='right')
+        plt.show
+
     def print_tri_grams(self):
         '''prints most common tri-grams'''
         corpus=[]
@@ -313,33 +484,90 @@ class vizzy_sentence:
         print("The most common tri-grams in your text are:")
         for word, count in zip(x,y):
             print(str(word) + " : " + str(count))
- 
         
+    def print_tri_grams_split(self, split1="train", split2="test"):
+        '''prints most common tri-grams for train data'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.data[self.split]==split1][self.column],3)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        print("The most common bi-grams in your {} text are:".format(str(split1)))
+        for word, count in zip(x,y):
+            print(str(word) + " : " + str(count))
+        
+        '''prints most common tri-grams for test data'''
+        corpus=[]
+        new=self.data[self.column].str.split()
+        new=new.values.tolist()
+        corpus=[word for i in new for word in i]
+        def get_top_ngram(corpus, n=None):
+            vec = CountVectorizer(ngram_range=(n, n)).fit(corpus)
+            bag_of_words = vec.transform(corpus)
+            sum_words = bag_of_words.sum(axis=0) 
+            words_freq = [(word, sum_words[0, idx]) 
+                          for word, idx in vec.vocabulary_.items()]
+            words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+            return words_freq[:10]
+
+        top_n_bigrams=get_top_ngram(self.data[self.data[self.split]==split2][self.column],3)[:10]
+        x,y=map(list,zip(*top_n_bigrams))
+        print('\n')
+        print("The most common tri-grams in your {} text are:".format(str(split2)))
+        for word, count in zip(x,y):
+            print(str(word) + " : " + str(count))
+        
+        
+
 class vizzy_token:
-    def __init__(self, dataframe, text, labels=None):
+    def __init__(self, dataframe, text, split = None, labels = None):
         self.data = dataframe
         self.text = text
+        self.split = split
         self.labels = labels
         
-    def show_labels_count(self):
+    def show_labels_count(self, column):
+        plt.hist(self.data[column])
+        plt.title('Histogram of {}'.format(column))
+        plt.show()
+        
+    def show_labels_count_split(self, splits=None):
         '''show count of each label'''
-        labels = self.data[self.labels]
-        counter = Counter(labels)
-        x = list(counter.keys())
-        y = list(counter.values())
-        plot = sns.barplot(x=y,y=x)
-        return plot
-    
-    def print_labels_count(self):
-        '''print count of each label'''
-        labels = self.data[self.labels]
-        counter = Counter(labels)
-        x = list(counter.keys())
-        y = list(counter.values())
-        z = zip(x,y)
-        for label, count in z:
-            print("Total number of {}: {}".format(label, count))
-            
+        if self.split != None:
+            for l in self.labels:
+                for s in splits:
+                    if l == self.split:
+                        raise ValueError("Your split column and label columns are the same. Please try again.")
+                    labels = self.data[self.data[self.split]==s][l]
+                    counter = Counter(labels)
+                    x = list(counter.keys())
+                    y = list(counter.values())
+                    sorted_y, sorted_x = zip(*sorted(zip(y, x), reverse=True))
+                    plt.bar(sorted_x, sorted_y)
+                    plt.title("{} by {}".format(s,l))
+                    plt.xticks(rotation=90, ha='right')
+                    plt.show()
+        else:
+            for l in self.labels:
+                labels = self.data[l]
+                counter = Counter(labels)
+                x = list(counter.keys())
+                y = list(counter.values())
+                sorted_y, sorted_x = zip(*sorted(zip(y, x), reverse=True))
+                plt.bar(sorted_x, sorted_y)
+                plt.xticks(rotation=90, ha='right')
+                plt.show()
+
     def print_case(self):
         def count_upper_lower_integer(df, column):
             upper = 0
@@ -377,14 +605,12 @@ class vizzy_token:
         for key, item in result.items():
             keys.append(key)
             items.append(item)
-        plt.pie(items, labels=keys, autopct='%1.1f%%')
+        plt.bar(keys, items)
         plt.title('Tokens by case')
         plt.show
 
-
-
 class vizzy_doc:
-    def __init__(self, data, column1, column2=None, column3=None, column4=None, column5=None, date_column=None, date_format=None):
+    def __init__(self, data, column1, column2=None, column3=None, column4=None, column5=None, date_column=None, date_format=None, split=None):
         self.data = data
         self.column1 = column1
         self.column2 = column2
@@ -393,6 +619,8 @@ class vizzy_doc:
         self.column5 = column5
         self.date_column = date_column
         self.date_format = date_format
+        self.split = split
+        self.set = [column1, column2, column3, column4, column5]
         
     def print_doc_stats(self):
         '''Print the statistics of your document'''
@@ -430,7 +658,7 @@ class vizzy_doc:
             year_counts = df['year'].value_counts()
             year_percents = year_counts / year_counts.sum() * 100
             plt.figure(0)
-            plt.pie(year_percents, labels=year_percents.index[0:40], autopct='%1.1f%%')
+            plt.bar(year_counts.index, year_counts)
             plt.title("Docs by {}".format(str(self.date_column)))
         else:
             pass
@@ -439,7 +667,7 @@ class vizzy_doc:
             col2_counts = self.data[self.column2].value_counts()
             col2_percents = col2_counts/col2_counts.sum() * 100
             plt.figure(1)
-            plt.pie(col2_percents, labels = col2_percents.index, autopct = '%1.1f%%')
+            plt.bar(col2_counts.index, col2_counts)
             plt.title("Docs by {}".format(str(self.column2)))
         else:
             pass
@@ -448,7 +676,7 @@ class vizzy_doc:
             col3_counts = self.data[self.column3].value_counts()
             col3_percents = col3_counts/col3_counts.sum() * 100 
             plt.figure(2)
-            plt.pie(col3_percents, labels = col3_percents.index, autopct = '%1.1f%%')
+            plt.bar(col3_counts.index, col3_counts)
             plt.title("Docs by {}".format(str(self.column3)))
         else:
             pass
@@ -457,7 +685,7 @@ class vizzy_doc:
             col4_counts = self.data[self.column4].value_counts()
             col4_percents = col4_counts/col4_counts.sum() * 100 
             plt.figure(3)
-            plt.pie(col4_percents, labels = col4_percents.index, autopct = '%1.1f%%')
+            plt.bar(col4_counts.index, col4_counts)
             plt.title("Docs by {}".format(str(self.column4)))
         else:
             pass
@@ -466,11 +694,44 @@ class vizzy_doc:
             col5_counts = self.data[self.column5].value_counts()
             col5_percents = col5_counts/col5_counts.sum() * 100 
             plt.figure(4)
-            plt.pie(col5_percents, labels = col5_percents.index, autopct = '%1.1f%%')
+            plt.bar(col5_counts.index, col5_counts)
             plt.title("Docs by {}".format(str(self.column5)))
         else:
             pass
         
         plt.show()
+        
+    def show_split_doc_stats(self, split1=None, split2=None):
+        if self.date_column != None and self.date_format != None:
+            def extract_year(data, column, date_format=self.date_format, new_column=None):
+                # Extract the year from the date column
+                data[new_column] = pd.to_datetime(data[column], format = date_format).dt.year
+                return data
+            self.data = extract_year(self.data, self.date_column, date_format=self.date_format, new_column='year')
+            self.set.append("year")
+        else:
+            pass
+        # Get the list of categorical variables
+        categorical_vars = [col for col in self.set if col != None]
 
-       
+        # Loop through each categorical variable
+        for var in categorical_vars:
+            # Plot the histogram for all values
+            plt.hist(self.data[var], bins=20, color='blue', alpha=0.5, label='All')
+
+            # Plot the histogram for train values
+            plt.hist((self.data[var][self.data[self.split]==split1]), bins=20, color='green', alpha=0.5, label=str(split1))
+
+            # Plot the histogram for test values
+            plt.hist((self.data[var][self.data[self.split]==split2]), bins=20, color='red', alpha=0.5, label=str(split2))
+            
+            # Add the labels and title
+            plt.xlabel('Value')
+            plt.ylabel('Frequency')
+            plt.title('Histograms of {}'.format(str(var)))
+
+            # Show the legend
+            plt.legend()
+
+            # Show the plot
+            plt.show()

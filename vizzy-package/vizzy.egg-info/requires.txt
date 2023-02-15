@@ -10,3 +10,5 @@ wordcloud
 textblob
 spacy
 textstat
+gensim
+pyldavis

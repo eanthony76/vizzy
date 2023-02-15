@@ -11,3 +11,5 @@ This is the history file of my package.
 2/7/23: Added new functions to Vizzy Token module
 
 2/10/23: Added documentation and simplified functions
+
+2/15/23: Added functions

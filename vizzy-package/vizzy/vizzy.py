@@ -27,6 +27,9 @@ import pickle
 import re
 import pyLDAvis
 import pyLDAvis.gensim_models
+from sklearn.neighbors import NearestNeighbors
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 
 plt.rcParams.update({'font.size': 18})
@@ -70,7 +73,7 @@ class vizzy_sentence:
     histograms'''
     def show_char_count(self, split1=None, split2=None):
         '''Histogram of the length of your data column in characters'''    
-         '''Plot the histogram for all values'''
+        '''Plot the histogram for all values'''
         plt.hist(self.data[self.column].str.len(), bins=20, color='blue', alpha=0.5, label='All')
 
         '''Plot the histogram for split1 values'''
@@ -951,7 +954,7 @@ class vizzy_sentence:
     -------
     A graph containing the topic model visualization.
     '''
-    def topic_model(self):
+    def topic_model(self, topics=10):
         model_data = self.data['text_without_stopwords'].values.tolist()
         model_data = [m.split(' ') for m in model_data]
         id2word = Dictionary(model_data)
@@ -959,7 +962,7 @@ class vizzy_sentence:
         
         lda_model = LdaModel(corpus=corpus,
                    id2word=id2word,
-                   num_topics=10,
+                   num_topics=topics,
                    random_state=0,
                    chunksize=100,
                    alpha='auto',
@@ -969,6 +972,61 @@ class vizzy_sentence:
         pyLDAvis.enable_notebook()
         graph = pyLDAvis.gensim_models.prepare(lda_model, corpus, id2word)
         return graph
+    
+    
+    
+    
+    
+    
+    '''Creates a histogram of cosine similarity between all pairs of vectors in the input list.
+    Parameters:
+    --------
+    v- DataFrame column containing word vectors
+
+    returns:
+    --------
+    histogram showing cosine similarities'''
+    def show_cosine_sim(self, v=None):
+        n = len(self.data[v])
+        #Create blank list the same size as our vectors
+        cosine_sims = np.zeros((n, n))
+
+        # Compute pairwise cosine similarities
+        for i in range(n):
+            for j in range(i+1, n):
+                cosine_sims[i, j] = cosine_similarity(self.data[v][i].reshape(1, -1), self.data[v][j].reshape(1, -1))[0, 0]
+                cosine_sims[j, i] = cosine_sims[i, j]
+
+        # Plot histogram of cosine similarities
+        plt.hist(cosine_sims)
+        plt.xlabel('Cosine similarity')
+        plt.ylabel('Frequency')
+        plt.title('Histogram of cosine similarity')
+        plt.show()
+        
+      
+    
+   
+    
+    
+        '''Uses KNN to find outliers in a list of vectors.
+    Parameters:
+    --------
+    vectors (list): A list of 1D numpy arrays representing vectors.
+    k (int): The number of nearest neighbors to consider for each vector. Defaults to 5.
+    threshold (float): The threshold for determining outliers based on the median distance to k-nearest neighbors. Defaults to 3.0.
+
+    Returns:
+    --------
+    A list of the indices of the outlier vectors in the input list.'''
+    def find_outliers_knn(self, v=None, k=5, threshold=3.0):
+        nbrs = NearestNeighbors(n_neighbors=k, algorithm='auto').fit(self.data[v].tolist())
+        distances, indices = nbrs.kneighbors(self.data[v].tolist())
+        median_distances = np.median(distances, axis=1)
+        outlier_indices = np.where(median_distances > threshold * np.median(median_distances))[0]
+        return outlier_indices.tolist()
+       
+        
 
             
 

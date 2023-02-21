@@ -11,4 +11,4 @@ textblob
 spacy
 textstat
 gensim
-pyldavis
+scikit-learn

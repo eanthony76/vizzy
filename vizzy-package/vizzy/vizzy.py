@@ -232,7 +232,7 @@ class vizzy_sentence:
         corpus=[]
         new= self.data[self.column].str.split()
         new=new.values.tolist()
-        corpus=[word for i in new for word in i]
+        corpus=[word.lower() for i in new for word in i]
         from collections import defaultdict
         dic=defaultdict(int)
         for word in corpus:
@@ -263,7 +263,7 @@ class vizzy_sentence:
         corpus=[]
         new= self.data[self.column].str.split()
         new=new.values.tolist()
-        corpus=[word for i in new for word in i]
+        corpus=[word.lower() for i in new for word in i]
 
         from collections import defaultdict
         dic=defaultdict(int)
@@ -296,7 +296,7 @@ class vizzy_sentence:
         corpus=[]
         new=self.data[self.column].str.split()
         new=new.values.tolist()
-        corpus=[word for i in new for word in i]
+        corpus=[word.lower() for i in new for word in i]
         counter=Counter(corpus)
         most=counter.most_common()
         x, y=[], []
@@ -333,7 +333,7 @@ class vizzy_sentence:
         corpus=[]
         new=self.data[self.data[self.split]==split1][self.column].str.split()
         new=new.values.tolist()
-        corpus=[word for i in new for word in i]
+        corpus=[word.lower() for i in new for word in i]
         counter=Counter(corpus)
         most=counter.most_common()
         x, y=[], []
@@ -356,7 +356,7 @@ class vizzy_sentence:
         corpus=[]
         new=self.data[self.data[self.split]==split2][self.column].str.split()
         new=new.values.tolist()
-        corpus=[word for i in new for word in i]
+        corpus=[word.lower() for i in new for word in i]
         counter=Counter(corpus)
         most=counter.most_common()
         x, y=[], []
@@ -388,7 +388,7 @@ class vizzy_sentence:
         corpus=[]
         new=self.data[self.column].str.split()
         new=new.values.tolist()
-        corpus=[word for i in new for word in i]
+        corpus=[word.lower() for i in new for word in i]
         counter=Counter(corpus)
         most=counter.most_common()
         x, y=[], []
@@ -948,7 +948,7 @@ class vizzy_sentence:
     '''Creates a topic model visualization using Latent Dirichlet Allocation (LDA) algorithm, which identifies topics in a set of documents and assigns each word in a document to one of the identified topics. 
     Parameters
     ----------
-    None
+    topics: Number of topics you want to see in your topic model (Default: 10)
 
     Returns
     -------
@@ -981,20 +981,20 @@ class vizzy_sentence:
     '''Creates a histogram of cosine similarity between all pairs of vectors in the input list.
     Parameters:
     --------
-    v- DataFrame column containing word vectors
+    vectors- DataFrame column containing word vectors
 
     returns:
     --------
     histogram showing cosine similarities'''
-    def show_cosine_sim(self, v=None):
-        n = len(self.data[v])
+    def show_cosine_sim(self, vectors=None):
+        n = len(self.data[vectors])
         #Create blank list the same size as our vectors
         cosine_sims = np.zeros((n, n))
 
         # Compute pairwise cosine similarities
         for i in range(n):
             for j in range(i+1, n):
-                cosine_sims[i, j] = cosine_similarity(self.data[v][i].reshape(1, -1), self.data[v][j].reshape(1, -1))[0, 0]
+                cosine_sims[i, j] = cosine_similarity(self.data[vectors][i].reshape(1, -1), self.data[vectors][j].reshape(1, -1))[0, 0]
                 cosine_sims[j, i] = cosine_sims[i, j]
 
         # Plot histogram of cosine similarities
@@ -1019,14 +1019,15 @@ class vizzy_sentence:
     Returns:
     --------
     A list of the indices of the outlier vectors in the input list.'''
-    def find_outliers_knn(self, v=None, k=5, threshold=3.0):
-        nbrs = NearestNeighbors(n_neighbors=k, algorithm='auto').fit(self.data[v].tolist())
-        distances, indices = nbrs.kneighbors(self.data[v].tolist())
+    def find_outliers_knn(self, vectors=None, k=5, threshold=3.0):
+        nbrs = NearestNeighbors(n_neighbors=k, algorithm='auto').fit(self.data[vectors].tolist())
+        distances, indices = nbrs.kneighbors(self.data[vectors].tolist())
         median_distances = np.median(distances, axis=1)
         outlier_indices = np.where(median_distances > threshold * np.median(median_distances))[0]
-        return outlier_indices.tolist()
-       
-        
+        ind_list =  outlier_indices.tolist()
+        print("The following vectors are outliers:")
+        for ind in ind_list:
+            print(self.data.loc[ind])
 
             
 
